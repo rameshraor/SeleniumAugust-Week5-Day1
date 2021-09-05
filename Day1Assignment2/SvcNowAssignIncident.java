@@ -25,7 +25,7 @@ import org.testng.annotations.Test;
 public class SvcNowAssignIncident extends SvcNowCommonClass {
 
 	@Test
-	public void tsCreateNew() throws InterruptedException, IOException {
+	public void tsCAssignIncident() throws InterruptedException, IOException {
 
 		/*
 		 * Step 1: click on open and Search for the existing incident and click on the
@@ -33,8 +33,8 @@ public class SvcNowAssignIncident extends SvcNowCommonClass {
 		 */
 
 		System.out.println("Assigning an Existing Incident");
-		System.out.println("Searching for the Incident - INC0010008 - in order to assign it");
-		String strSrchIncNbr = "INC0010008";
+		System.out.println("Searching for the Incident - INC0010007 - in order to assign it");
+		String strSrchIncNbr = "INC0010007";
 
 		// Step 1a: Click on "Open" in the left side bar
 		driver.findElement(By.xpath("(//div[text()='Open'])[1]")).click();
@@ -80,6 +80,7 @@ public class SvcNowAssignIncident extends SvcNowCommonClass {
 
 				// Step 2e: Click the "Software" group to select
 				driver.findElement(By.xpath("//tbody[@class='list2_body']/tr/td[3]/a")).click();
+				Thread.sleep(1000);
 
 				// Step 2f: Switch to the parent window, and switch to the right-side frame
 				driver.switchTo().window(windowHandlesList1.get(0));

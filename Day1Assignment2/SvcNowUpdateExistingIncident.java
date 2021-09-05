@@ -9,12 +9,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.collections4.bag.SynchronizedSortedBag;
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.Test;
 
 /**
@@ -25,7 +27,7 @@ import org.testng.annotations.Test;
 public class SvcNowUpdateExistingIncident extends SvcNowCommonClass {
 
 	@Test
-	public void tsCreateNew() throws InterruptedException, IOException {
+	public void tsUpdateIncident() throws InterruptedException, IOException {
 
 		/*
 		 * Step 1: Search for the existing incident and click on the incident
@@ -46,6 +48,7 @@ public class SvcNowUpdateExistingIncident extends SvcNowCommonClass {
 		// Step 1c: Enter the Incident number in the search box, and hit Enter key
 		driver.findElement(By.xpath("(//label[text()='Search'])[2]/following-sibling::input")).sendKeys(strSrchIncNbr,
 				Keys.ENTER);
+		System.out.println("Updation of incident starting.....");
 		Thread.sleep(1000);
 
 		// Step 2: Verify the incident is existing, and if yes, then update it
@@ -53,7 +56,10 @@ public class SvcNowUpdateExistingIncident extends SvcNowCommonClass {
 		// Step 2a: Locate the incident number in the search results, and check if it is
 		// the expected incident number
 		WebElement elemSrchResInc = driver.findElement(By.xpath("//tbody[@class='list2_body']/tr/td[3]/a"));
+		
 		if (elemSrchResInc.isDisplayed()) {
+			
+			System.out.println("Able to locate the incident in the screen");
 			String actIncNbr = elemSrchResInc.getAttribute("aria-label");
 
 			if (actIncNbr.contains(strSrchIncNbr)) {
@@ -62,25 +68,45 @@ public class SvcNowUpdateExistingIncident extends SvcNowCommonClass {
 				// Click on it, for update
 				elemSrchResInc.click();
 
-				// Step 2c: Update the description box
-				driver.findElement(By.xpath("//textarea[@id='incident.description']"))
-						.sendKeys("Updated the incident now!!!");
-
+				// Step 2c: Update the incidents with State as In Progress
+				WebElement elemIncState = driver.findElement(By.xpath("//select[@id='incident.state']"));
+				Select drpDnIncSt = new Select(elemIncState);
+				drpDnIncSt.selectByValue("2");
+				System.out.println("State updated");
+				Thread.sleep(2000);
+				
 				// Step 2d: Update the incidents with Urgency as High
 				WebElement elemIncUrgency = driver.findElement(By.xpath("//select[@id='incident.urgency']"));
 				Select drpDnIncUrg = new Select(elemIncUrgency);
 				drpDnIncUrg.selectByValue("1");
-				Thread.sleep(1000);
+				System.out.println("Urgency updated");
+				Thread.sleep(2000);
 
-				// Step 2e: Update the incidents with State as In Progress
-				WebElement elemIncState = driver.findElement(By.xpath("//select[@id='incident.state']"));
-				Select drpDnIncSt = new Select(elemIncState);
-				drpDnIncSt.selectByValue("2");
-				Thread.sleep(1000);
+				// Step 2e: Update the description box
+				driver.findElement(By.xpath("//textarea[@id='incident.description']"))
+						.sendKeys("Updated the incident now!!!");
+				System.out.println("Description updated");
+				Thread.sleep(2000);
 
-				// Step 2f: Click the update button
+				// Step 2f: Update the incident with Work Notes
+				// Scroll up the screen - till "Filters" so that the web elements can be
+				// captured
+				WebElement elemScrl = driver.findElement(By.xpath("//span[@id='status.incident.short_description']"));
+				driver.executeScript("arguments[0].scrollIntoView();", elemScrl);
+				System.out.println("scrolled down");
+				Thread.sleep(2000);
+
+				WebElement elemWrkNts = driver.findElement(By.xpath("//textarea[@id='activity-stream-textarea']"));
+				elemWrkNts.click();
+				Thread.sleep(2000);
+				elemWrkNts.sendKeys("This is the worknotes for the updates to this incident");
+				System.out.println("Work notes updated");
+				Thread.sleep(5000);
+
+				// Step 2g: Click the update button
 				driver.findElement(By.xpath("//button[@id='sysverb_update']")).click();
 				System.out.println("Incident " + strSrchIncNbr + " has been updated successfully");
+				Thread.sleep(2000);
 
 			} else
 				System.out.println("Incident is not created successfully. Expected : " + strSrchIncNbr
@@ -103,6 +129,7 @@ public class SvcNowUpdateExistingIncident extends SvcNowCommonClass {
 		// Step 3b: Get the incident number, Incident urgency and Incident State and
 		// validate if they have been updated correctly
 		String strCurrIncNbr = driver.findElement(By.xpath("//input[@id='incident.number']")).getText();
+		System.out.println("Current incident number is : " + strCurrIncNbr);
 
 		if (strCurrIncNbr.equals(strSrchIncNbr)) {
 

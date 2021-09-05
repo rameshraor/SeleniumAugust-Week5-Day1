@@ -9,7 +9,9 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
@@ -25,7 +27,7 @@ public class SvcNowCommonClass {
 	
 	public ChromeDriver driver;
 	
-	@BeforeMethod
+	@BeforeClass
 	public void LogIntoSvcNow() throws InterruptedException {
 		
 		//Step 0a: Launch the browser
@@ -59,7 +61,7 @@ public class SvcNowCommonClass {
 				
 	}
 	
-	@AfterMethod
+	@AfterClass
 	public void closeBrowser() {
 		
 		System.out.println("Executed the test case.... closing the browser!");
