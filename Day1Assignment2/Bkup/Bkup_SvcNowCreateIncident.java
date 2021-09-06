@@ -1,12 +1,18 @@
 /**
  * 
  */
-package week5.Day1Assignment2;
+package week5.Day1Assignment2.Bkup;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.OutputType;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 import org.testng.annotations.Test;
@@ -16,7 +22,7 @@ import org.testng.annotations.Test;
  * 
  *         This class contains the test case for "Create Incident"
  */
-public class SvcNowCreateIncident extends SvcNowCommonClass {
+public class Bkup_SvcNowCreateIncident extends Bkup_SvcNowCommonClass {
 
 	@Test
 	public void tsCreateNew() throws InterruptedException, IOException {
@@ -26,20 +32,22 @@ public class SvcNowCreateIncident extends SvcNowCommonClass {
 		 */
 
 		System.out.println("Creating New Incident");
-		SvcNowCreateIncident objCrInc = new SvcNowCreateIncident();
 
 		// Step 1a: Click on Create new option
 		driver.findElement(By.xpath("(//div[text()='Create New'])[1]")).click();
 		Thread.sleep(1000);
 
 		// Step 1b: Switch to the right-side frame (in which the "New" button is placed
-		driver.switchTo().frame("gsft_main");
+		WebElement frame2 = driver.findElement(By.xpath("//iframe[@id='gsft_main']"));
+		driver.switchTo().frame(frame2);
 
 		// Step 1c: Click on the lens icon against "caller"
 		driver.findElement(By.xpath("//button[@id='lookup.incident.caller_id']")).click();
 
 		// Step 1d: Handle windows (because the earlier action opens a pop-up window)
-		List<String> windowHandlesList1 = objCrInc.handleWindows(driver);
+		Set<String> windowHandlesSet1 = driver.getWindowHandles();
+		List<String> windowHandlesList1 = new ArrayList<String>(windowHandlesSet1);
+		driver.switchTo().window(windowHandlesList1.get(1));
 
 		// Step 1e: Select "name" in the drop down options
 		WebElement elemSrchCritDrpDn = driver
@@ -72,7 +80,7 @@ public class SvcNowCreateIncident extends SvcNowCommonClass {
 
 		// Step 1k: click submit button at the top
 		driver.findElement(By.xpath("//button[@id='sysverb_insert']")).click();
-				
+		
 		
 		/*
 		 * Step 2: Verify the newly created incident (copy the incident number and paste
@@ -81,8 +89,29 @@ public class SvcNowCreateIncident extends SvcNowCommonClass {
 		
 		System.out.println("Verifying if the New Incident has been created successfully....");
 
-		objCrInc.validateIncidentNbr(driver, incNumber, "CREATE INCIDENT");
-		
+		// Step 2a - Search the same incident number in the next search screen as below.
+		driver.findElement(By.xpath("(//label[text()='Search'])[2]/following-sibling::input")).sendKeys(incNumber,
+				Keys.ENTER);
+		Thread.sleep(1000);
+
+		// Step 2b: Verify the incident is created successful and take snapshot of the
+		// created incident.
+		if (driver.findElement(By.xpath("//a[contains(@aria-label,'Open record')]")).isDisplayed()) {
+			String actIncNbr = driver.findElement(By.xpath("//a[contains(@aria-label,'Open record')]"))
+					.getAttribute("aria-label");
+			if (actIncNbr.contains(incNumber)) {
+				System.out.println("Incident " + incNumber + " has been created successfully");
+				File fileSrc = driver.getScreenshotAs(OutputType.FILE);
+				File fileDest = new File("./snaps/IncidentNumber.png");
+				FileUtils.copyFile(fileSrc, fileDest);
+			} else
+				System.out.println("Incident is not created successfully. Expected : " + driver
+						+ " but Actual displayed here : " + actIncNbr);
+
+		} else {
+			System.out.println("No results displayed for the incident number.");
+		}
+
 	}
 
 }

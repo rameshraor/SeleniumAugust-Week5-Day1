@@ -1,7 +1,7 @@
 /**
  * 
  */
-package week5.Day1Assignment2;
+package week5.Day1Assignment2.Bkup;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,58 +22,64 @@ import org.testng.annotations.Test;
  * 
  *         This class contains the test case for "Assign Incident"
  */
-public class SvcNowAssignIncident extends SvcNowCommonClass {
+public class Bkup_SvcNowAssignIncident extends Bkup_SvcNowCommonClass{
 
 	@Test
-	public void tsCAssignIncident() throws InterruptedException, IOException {
+	public void tsCreateNew() throws InterruptedException, IOException {
 
 		/*
-		 * Step 1: click on open and Search for the existing incident and click on the incident
+		 * Step 1: click on open and Search for the existing incident and click on the
+		 * incident
 		 */
 
 		System.out.println("Assigning an Existing Incident");
-		SvcNowAssignIncident objAssnInc = new SvcNowAssignIncident();
-		
+		System.out.println("Searching for the Incident - INC0010007 - in order to assign it");
 		String strSrchIncNbr = "INC0010007";
-		System.out.println("Searching for the Incident - " + strSrchIncNbr + " - in order to Assign it");
-		
+
 		// Step 1a: Click on "Open" in the left side bar
 		driver.findElement(By.xpath("(//div[text()='Open'])[1]")).click();
 		Thread.sleep(1000);
 
 		// Step 1b: Switch to the right-side frame
-		driver.switchTo().frame("gsft_main");
+		WebElement frame2 = driver.findElement(By.xpath("//iframe[@id='gsft_main']"));
+		driver.switchTo().frame(frame2);
 
 		// Step 1c: Enter the Incident number in the search box, and hit Enter key
 		driver.findElement(By.xpath("(//label[text()='Search'])[2]/following-sibling::input")).sendKeys(strSrchIncNbr,
 				Keys.ENTER);
-		System.out.println("Assignment of incident starting.....");
 		Thread.sleep(1000);
 
 		// Step 2: Verify the incident is existing, and if yes, then update it
 
-		int incFoundIndPre = objAssnInc.searchIncidentNbr(driver, strSrchIncNbr);
+		// Step 2a: Locate the incident number in the search results, and check if it is
+		// the expected incident number
+		WebElement elemSrchResInc = driver.findElement(By.xpath("//tbody[@class='list2_body']/tr/td[3]/a"));
+		if (elemSrchResInc.isDisplayed()) {
+			String actIncNbr = elemSrchResInc.getAttribute("aria-label");
 
-		if (incFoundIndPre == 1) {
+			if (actIncNbr.contains(strSrchIncNbr)) {
 
-			// Step 2a: Get the page title (of the incidents screen)
-						String strPage2Title = driver.getTitle();
-						
-				// Step 2b: Click the assignment grouo
+				// Step 2b: The searched incident number is shown in the results
+				// Click on it, in order to update the assignment
+				elemSrchResInc.click();
+				Thread.sleep(1000);
+
+				// Step 2c: Click the assignment grouo
 				driver.findElement(By.xpath("//button[@id='lookup.incident.assignment_group']")).click();
 				Thread.sleep(1000);
 
 				// Step 2d: Handle windows (because the earlier action opens a pop-up window)
-				List<String> windowHandlesList1 = objAssnInc.handleWindows(driver);
-				
+				Set<String> windowHandlesSet1 = driver.getWindowHandles();
+				List<String> windowHandlesList1 = new ArrayList<String>(windowHandlesSet1);
+				driver.switchTo().window(windowHandlesList1.get(1));
+
 				// Step 2e: Enter "Software" in the search box, and hit Enter
-				driver.findElement(By.xpath("//label[text()='Search']//following-sibling::input")).sendKeys("Software",
+				driver.findElement(By.xpath("(//label[text()='Search']//following-sibling::input")).sendKeys("Software",
 						Keys.ENTER);
 				Thread.sleep(1000);
 
 				// Step 2e: Click the "Software" group to select
 				driver.findElement(By.xpath("//tbody[@class='list2_body']/tr/td[3]/a")).click();
-				Thread.sleep(1000);
 
 				// Step 2f: Switch to the parent window, and switch to the right-side frame
 				driver.switchTo().window(windowHandlesList1.get(0));
@@ -92,10 +98,17 @@ public class SvcNowAssignIncident extends SvcNowCommonClass {
 				// Step 1g: Click the update button
 				driver.findElement(By.xpath("//button[@id='sysverb_update']")).click();
 				Thread.sleep(1000);
+				
+				System.out.println("Incident " + strSrchIncNbr + " has been updated successfully");
 
-				System.out.println("Incident " + strSrchIncNbr + " has been ASSIGNED successfully");
+			} else
+				System.out.println("Incident is not created successfully. Expected : " + strSrchIncNbr
+						+ " but Actual displayed here : " + actIncNbr);
 
-			} 
+		} else {
+			System.out.println("No results displayed for the incident number!!!");
+		}
+
 
 	}
 

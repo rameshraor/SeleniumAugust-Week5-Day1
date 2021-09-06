@@ -1,47 +1,98 @@
 /**
  * 
  */
-package week5.Day1Assignment2;
+package week5.Day1Assignment2.Bkup;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.io.FileUtils;
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.OutputType;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-
 import io.github.bonigarcia.wdm.WebDriverManager;
 
 /**
  * @author Ramesh
  * 
- *         This is the common class for the Service Now testing - Has Login
- *         method, as the before-method
- * 
+ *         This class contains the test case for "Update Existing Incident"
  */
-public class SvcNowCommonClass {
+public class SvcNowDeleteIncidentMain {
 
-	public ChromeDriver driver;
+	public static void main(String[] args) throws InterruptedException, IOException {
 
-	@BeforeClass
-	public void LogIntoSvcNow() throws InterruptedException {
+		/*
+		 * Step 1: Search for the existing incident and click on the incident
+		 */
+
+		System.out.println("Deleting an Existing Incident");
+		SvcNowDeleteIncidentMain objDelInc = new SvcNowDeleteIncidentMain();
+		
+		ChromeDriver driver = objDelInc.LogIntoSvcNow();
+		
+		String strSrchIncNbr = "INC0000025";
+		System.out.println("Searching for the Incident - " + strSrchIncNbr + " - in order to delete it");
+		
+		// Step 1a: Click on "Incidents" under Service Desk
+		driver.findElement(By.xpath("(//div[text()='Incidents'])[2]")).click();
+		Thread.sleep(1000);
+
+		// Step 1b: Switch to the right-side frame
+		driver.switchTo().frame("gsft_main");
+
+		// Step 1c: Enter the Incident number in the search box, and hit Enter key
+		driver.findElement(By.xpath("(//label[text()='Search'])[2]/following-sibling::input")).sendKeys(strSrchIncNbr,
+				Keys.ENTER);
+		System.out.println("Deletion of incident starting.....");
+		Thread.sleep(1000);
+		
+		// Step 2: Verify the incident is created successful
+
+		int incFoundIndPre = objDelInc.searchIncidentNbr(driver, strSrchIncNbr);
+		
+		if (incFoundIndPre == 1) {
+
+				// Step 2a: Click the update button
+				driver.findElement(By.xpath("//button[@id='sysverb_delete']")).click();
+				Thread.sleep(2000);
+				
+				/*
+				Alert alert = driver.switchTo().alert();
+				Thread.sleep(2000);
+				alert.accept();
+				Thread.sleep(2000);
+				*/
+				driver.findElement(By.xpath("//button[@id='ok_button']")).click();
+
+				System.out.println("Incident " + strSrchIncNbr + " has been deleted successfully");
+
+		}
+		
+		/*
+		 * Step 3: Verify if the Delete has been successful
+		 */
+		
+		System.out.println("Verifying if the incident Delete is successful.....");
+
+		int incFoundIndPost = objDelInc.searchIncidentNbr(driver, strSrchIncNbr);
+
+		if (incFoundIndPost == 0) {
+			
+			System.out.println("The action DELETE INCIDENT for the Incident " + strSrchIncNbr
+					+ " is successful!!!.");
+			
+		}
+
+	}
+	
+	public ChromeDriver LogIntoSvcNow() throws InterruptedException {
 
 		// Step 0a: Launch the browser
 		System.out.println("Launching the Chrome browser");
 
 		WebDriverManager.chromedriver().setup();
-		driver = new ChromeDriver();
+		ChromeDriver driver = new ChromeDriver();
 		driver.manage().window().maximize();
 		driver.get("https://dev108845.service-now.com"); // Ramesh's instance of the Service Now application
 		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
@@ -65,27 +116,11 @@ public class SvcNowCommonClass {
 
 		driver.findElement(By.xpath("//input[@id='filter']")).sendKeys("Incident", Keys.ENTER);
 		Thread.sleep(1000);
+		
+		return driver;
 
 	}
-
-	@AfterClass
-	public void closeBrowser() {
-
-		System.out.println("Executed the test case.... closing the browser!");
-		driver.close();
-
-	}
-
-	public List<String> handleWindows(ChromeDriver driver) {
-
-		Set<String> windowHandlesSet1 = driver.getWindowHandles();
-		List<String> windowHandlesList1 = new ArrayList<String>(windowHandlesSet1);
-		driver.switchTo().window(windowHandlesList1.get(1));
-
-		return windowHandlesList1;
-
-	}
-
+	
 	public int searchIncidentNbr(ChromeDriver driver, String srchIncNumber) throws InterruptedException {
 
 		// Step 2a: Locate the incident number in the search results, and check if it is
@@ -118,36 +153,5 @@ public class SvcNowCommonClass {
 		return incFoundInd;
 	}
 
-	public void validateIncidentNbr(ChromeDriver driver, String incNumber, String action)
-			throws InterruptedException, IOException {
-
-		// Step 2a - Search the same incident number in the next search screen as below.
-		driver.findElement(By.xpath("(//label[text()='Search'])[2]/following-sibling::input")).sendKeys(incNumber,
-				Keys.ENTER);
-		Thread.sleep(1000);
-
-		// Step 2b: Verify the incident search and the action are successful
-		if (driver.findElement(By.xpath("//a[contains(@aria-label,'Open record')]")).isDisplayed()) {
-
-			String actIncNbr = driver.findElement(By.xpath("//a[contains(@aria-label,'Open record')]"))
-					.getAttribute("aria-label");
-
-			if (actIncNbr.contains(incNumber)) {
-
-				System.out.println("The action " + action + " for the Incident " + incNumber + " is successful!!!");
-
-			} else {
-
-				System.out.println("The action " + action + " for the Incident " + incNumber
-						+ " is NOT successful!!!. Expected : " + incNumber + " but Actual displayed here : " + actIncNbr);
-			}
-
-		} else {
-
-			System.out.println("No results displayed for the incident number!!!");
-
-		}
-
-	}
 
 }
