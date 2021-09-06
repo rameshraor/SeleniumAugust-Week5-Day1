@@ -4,8 +4,10 @@
 	<test thread-count="5" name="Test">
 		<classes>
 			<class name="week5.Day1Assignment2.SvcNowCreateIncident" />
-			<class name="week5.Day1Assignment2.SvcNowUpdateExistingIncident" />
+			<class
+				name="week5.Day1Assignment2.SvcNowUpdateExistingIncident" />
 			<class name="week5.Day1Assignment2.SvcNowAssignIncident" />
+			<class name="week5.Day1Assignment2.SvcNowDeleteIncident" />
 		</classes>
 	</test> <!-- Test -->
 </suite> <!-- Suite -->
